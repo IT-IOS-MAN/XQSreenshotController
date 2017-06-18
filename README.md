@@ -10,4 +10,4 @@ SreenshotController
 
 gif 图片加载中...
 
-![gif](https://github.com/weakGG/XQTitleMeunView/blob/master/gif/meun.gif)
+![gif](https://github.com/weakGG/XQSreenshotController/blob/master/gif/selectimage.gif)
