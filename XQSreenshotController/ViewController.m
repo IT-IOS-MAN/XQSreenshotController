@@ -87,11 +87,11 @@
 #pragma mark - UINavigationControllerDelegate
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
-    [navigationController.navigationBar setTitleTextAttributes:
-     
-     @{NSFontAttributeName:[UIFont systemFontOfSize:18],
-       
-       NSForegroundColorAttributeName:[UIColor whiteColor]}];
+//    [navigationController.navigationBar setTitleTextAttributes:
+//     
+//     @{NSFontAttributeName:[UIFont systemFontOfSize:18],
+//       
+//       NSForegroundColorAttributeName:[UIColor whiteColor]}];
     
     self.nav = navigationController;
 }

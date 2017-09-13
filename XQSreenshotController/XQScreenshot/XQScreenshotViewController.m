@@ -7,10 +7,6 @@
 //
 
 #import "XQScreenshotViewController.h"
-#import "Masonry.h"
-#import "UIView+XQFrame.h"
-
-#define WeakSelf __weak typeof(self) weakSelf = self;
 
 @interface XQScreenshotViewController () <UIScrollViewDelegate>
 
@@ -29,6 +25,7 @@
     
     self.view.backgroundColor = [UIColor blackColor];
     self.title = @"移动和缩放";
+    
 
     [self setupScrollView];
     [self setupIconView];
@@ -45,12 +42,17 @@
 
 -(void)setupIconView
 {
-    CGFloat screenshotViewWH = self.view.xq_width * 0.7;
+    CGFloat screenshotViewWH = self.view.frame.size.width * 0.7;
     
     NSInteger scale = [UIScreen mainScreen].scale;
     
     CGFloat iocnViewW = self.image.size.width / scale;
     CGFloat iocnViewH = self.image.size.height / scale;
+    
+    if (iocnViewW > self.view.frame.size.width) {
+        iocnViewH = self.view.frame.size.width / iocnViewW * iocnViewH;
+        iocnViewW = self.view.frame.size.width;
+    }
     
     if (iocnViewW < screenshotViewWH) {
         iocnViewH = screenshotViewWH / iocnViewW * iocnViewH;
@@ -62,16 +64,17 @@
     }
     
     UIImageView *iocnView = [[UIImageView alloc] initWithImage:self.image];
-    iocnView.xq_size = CGSizeMake(iocnViewW, iocnViewH);
+    iocnView.frame = CGRectMake(0, 0, iocnViewW, iocnViewH);
     [self.scrollView addSubview:iocnView];
     self.iocnView = iocnView;
     
     // scrollView set
-    self.scrollView.contentSize = iocnView.xq_size;
+    self.scrollView.contentSize = iocnView.frame.size;
     
-    CGFloat InsetTopBottom = (self.view.xq_height - screenshotViewWH) * 0.5 - self.navigationController.navigationBar.xq_height - [[UIApplication sharedApplication] statusBarFrame].size.height;
-    CGFloat InsetLeftRight = (self.view.xq_width - screenshotViewWH) * 0.5;
-    self.scrollView.contentInset = UIEdgeInsetsMake(InsetTopBottom, InsetLeftRight, InsetTopBottom, InsetLeftRight);
+    CGFloat InsetTop = (self.view.frame.size.height - screenshotViewWH) * 0.5 - self.navigationController.navigationBar.frame.size.height - [[UIApplication sharedApplication] statusBarFrame].size.height;
+    CGFloat InsetBottom = (self.view.frame.size.height - screenshotViewWH) * 0.5;
+    CGFloat InsetLeftRight = (self.view.frame.size.width - screenshotViewWH) * 0.5;
+    self.scrollView.contentInset = UIEdgeInsetsMake(InsetTop, InsetLeftRight, InsetBottom, InsetLeftRight);
     
     CGFloat minimumZoomScale = 1;
     
@@ -94,100 +97,332 @@
     scrollView.bouncesZoom = NO;
     scrollView.minimumZoomScale = 0.7;
     scrollView.maximumZoomScale = 3.0;
+    scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:scrollView];
-    [scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.mas_equalTo(UIEdgeInsetsZero);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:scrollView
+                                                             attribute:NSLayoutAttributeTop
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeTop
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:scrollView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:scrollView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeLeft
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:scrollView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
+    
     self.scrollView = scrollView;
 }
 
 -(void)setupScreenshotView
 {
-    WeakSelf
     
     UIView *screenshotView = [[UIView alloc] init];
     screenshotView.layer.borderWidth = 1;
     screenshotView.layer.borderColor = [UIColor whiteColor].CGColor;
     screenshotView.layer.cornerRadius = 3;
+    screenshotView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:screenshotView];
-    [screenshotView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.size.mas_equalTo(weakSelf.view.xq_width * 0.7);
-        make.center.mas_equalTo(weakSelf.view);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:screenshotView
+                                                             attribute:NSLayoutAttributeWidth
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeWidth
+                                                            multiplier:0.7
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:screenshotView
+                                                             attribute:NSLayoutAttributeHeight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeWidth
+                                                            multiplier:0.7
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:screenshotView
+                                                             attribute:NSLayoutAttributeCenterX
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeCenterX
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:screenshotView
+                                                             attribute:NSLayoutAttributeCenterY
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeCenterY
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
+    
+    
     self.screenshotView = screenshotView;
 }
 
 -(void)setupMaskView
 {
-    WeakSelf
     
     // top
     UIView *topView = [[UIView alloc] init];
     topView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    topView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:topView];
-    [topView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(weakSelf.view);
-        make.left.equalTo(weakSelf.view);
-        make.right.equalTo(weakSelf.view);
-        make.bottom.equalTo(weakSelf.screenshotView.mas_top);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:topView
+                                                             attribute:NSLayoutAttributeTop
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeTop
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:topView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.screenshotView
+                                                             attribute:NSLayoutAttributeTop
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:topView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeLeft
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:topView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
     
     // left
     UIView *leftView = [[UIView alloc] init];
     leftView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    leftView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:leftView];
-    [leftView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(topView.mas_bottom);
-        make.left.equalTo(weakSelf.view);
-        make.right.equalTo(weakSelf.screenshotView.mas_left);
-        make.bottom.equalTo(weakSelf.view);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:leftView
+                                                             attribute:NSLayoutAttributeTop
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:topView
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:leftView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:leftView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeLeft
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:leftView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.screenshotView
+                                                             attribute:NSLayoutAttributeLeft
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
     
     // bottom
     UIView *bottomView = [[UIView alloc] init];
     bottomView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    bottomView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:bottomView];
-    [bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(weakSelf.screenshotView.mas_bottom);
-        make.left.equalTo(leftView.mas_right);
-        make.right.equalTo(weakSelf.view);
-        make.bottom.equalTo(weakSelf.view);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:bottomView
+                                                             attribute:NSLayoutAttributeTop
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.screenshotView
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:bottomView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:bottomView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:leftView
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:bottomView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
     
     // right
     UIView *rightView = [[UIView alloc] init];
     rightView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    rightView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.scrollView addSubview:rightView];
-    [rightView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(topView.mas_bottom);
-        make.left.equalTo(weakSelf.screenshotView.mas_right);
-        make.right.equalTo(weakSelf.view);
-        make.bottom.equalTo(bottomView.mas_top);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:rightView
+                                                             attribute:NSLayoutAttributeTop
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:topView
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:rightView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:bottomView
+                                                             attribute:NSLayoutAttributeTop
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:rightView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.screenshotView
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:rightView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
 }
 
 -(void)toolView
 {
     
-    WeakSelf
     CGFloat toolViewH = 50;
     
     UIView *toolView = [[UIView alloc] init];
     toolView.backgroundColor = [UIColor whiteColor];
+    toolView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:toolView];
-    [toolView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.height.mas_equalTo(toolViewH);
-        make.left.equalTo(weakSelf.view);
-        make.right.equalTo(weakSelf.view);
-        make.bottom.equalTo(weakSelf.view);
-    }];
+    
+    [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:toolView
+                                                             attribute:NSLayoutAttributeHeight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:nil
+                                                             attribute:NSLayoutAttributeHeight
+                                                            multiplier:1
+                                                              constant:toolViewH],
+                                
+                                [NSLayoutConstraint constraintWithItem:toolView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:toolView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeLeft
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:toolView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self.view
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
     
     UIView *maskView = [[UIView alloc] init];
+    maskView.translatesAutoresizingMaskIntoConstraints = NO;
     maskView.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.2];
     [toolView addSubview:maskView];
-    [maskView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.mas_equalTo(UIEdgeInsetsZero);
-    }];
+    
+    [toolView addConstraints:@[[NSLayoutConstraint constraintWithItem:maskView
+                                                             attribute:NSLayoutAttributeTop
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeTop
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:maskView
+                                                             attribute:NSLayoutAttributeBottom
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeBottom
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:maskView
+                                                             attribute:NSLayoutAttributeLeft
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeLeft
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:maskView
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:0]
+                                ]];
     
     UIButton *commitButton = [[UIButton alloc] init];
     commitButton.layer.borderWidth = 1;
@@ -199,13 +434,41 @@
     [commitButton setTitle:@"确定" forState:UIControlStateNormal];
     [commitButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     commitButton.titleLabel.font = [UIFont systemFontOfSize:14];
-    [self.view addSubview:commitButton];
-    [commitButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.height.mas_equalTo(toolViewH * 0.65);
-        make.right.equalTo(toolView).with.offset(-toolViewH * 0.35);
-        make.centerY.equalTo(toolView);
-        make.width.mas_equalTo(toolViewH * 1.2);
-    }];
+    commitButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [toolView addSubview:commitButton];
+
+    [toolView addConstraints:@[[NSLayoutConstraint constraintWithItem:commitButton
+                                                             attribute:NSLayoutAttributeHeight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeHeight
+                                                            multiplier:0.65
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:commitButton
+                                                             attribute:NSLayoutAttributeCenterY
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeCenterY
+                                                            multiplier:1
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:commitButton
+                                                             attribute:NSLayoutAttributeWidth
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeHeight
+                                                            multiplier:1.2
+                                                              constant:0],
+                                
+                                [NSLayoutConstraint constraintWithItem:commitButton
+                                                             attribute:NSLayoutAttributeRight
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:toolView
+                                                             attribute:NSLayoutAttributeRight
+                                                            multiplier:1
+                                                              constant:-toolViewH * 0.35]
+                                ]];
     
     
 }
@@ -254,15 +517,5 @@
     
     
 }
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end
