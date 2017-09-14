@@ -1,6 +1,16 @@
 # XQSreenshotController
 
-SreenshotController
+头像选择器
+
+在使用 XQSreenshotController 只需要通过 image 设置一张图片，便可以在 delegate 中获取到你想要截取的图片
+
+@property(nonatomic, retain) UIImage *image;  
+
+实现此代理方法
+
+-(void)screenshotViewController:(XQScreenshotViewController *) screenshotViewController didImage:(UIImage *) image;  
+
+如此简单
 
 头像选择器
 
