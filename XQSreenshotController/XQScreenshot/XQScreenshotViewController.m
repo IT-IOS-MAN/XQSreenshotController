@@ -73,10 +73,13 @@
     // scrollView set
     self.scrollView.contentSize = iocnView.frame.size;
     
-    CGFloat InsetTop = (self.view.frame.size.height - screenshotViewWH) * 0.5 - [[UIApplication sharedApplication] statusBarFrame].size.height;
+    CGFloat InsetTop = (self.view.frame.size.height - screenshotViewWH) * 0.5;
     if (!self.navigationController.navigationBar.hidden &&  [UIDevice currentDevice].systemVersion.floatValue >= 7.0)
     {
         InsetTop -= self.navigationController.navigationBar.frame.size.height;
+    }
+    if (![UIApplication sharedApplication].statusBarHidden) {
+        InsetTop -=  [[UIApplication sharedApplication] statusBarFrame].size.height;
     }
     CGFloat InsetBottom = (self.view.frame.size.height - screenshotViewWH) * 0.5;
     CGFloat InsetLeftRight = (self.view.frame.size.width - screenshotViewWH) * 0.5;
