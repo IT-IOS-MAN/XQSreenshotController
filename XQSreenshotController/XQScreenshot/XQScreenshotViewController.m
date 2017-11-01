@@ -33,6 +33,8 @@
     [self setupMaskView];
     
     [self toolView];
+    
+    [self setupBackButton];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -71,7 +73,11 @@
     // scrollView set
     self.scrollView.contentSize = iocnView.frame.size;
     
-    CGFloat InsetTop = (self.view.frame.size.height - screenshotViewWH) * 0.5 - self.navigationController.navigationBar.frame.size.height - [[UIApplication sharedApplication] statusBarFrame].size.height;
+    CGFloat InsetTop = (self.view.frame.size.height - screenshotViewWH) * 0.5 - [[UIApplication sharedApplication] statusBarFrame].size.height;
+    if (!self.navigationController.navigationBar.hidden &&  [UIDevice currentDevice].systemVersion.floatValue >= 7.0)
+    {
+        InsetTop -= self.navigationController.navigationBar.frame.size.height;
+    }
     CGFloat InsetBottom = (self.view.frame.size.height - screenshotViewWH) * 0.5;
     CGFloat InsetLeftRight = (self.view.frame.size.width - screenshotViewWH) * 0.5;
     self.scrollView.contentInset = UIEdgeInsetsMake(InsetTop, InsetLeftRight, InsetBottom, InsetLeftRight);
@@ -85,6 +91,55 @@
     }
     
     self.scrollView.minimumZoomScale = minimumZoomScale;
+}
+
+- (void) setupBackButton
+{
+    if (self.navigationController.navigationBar.hidden) {
+        UIButton *backButton = [[UIButton alloc] init];
+        
+        [backButton setTitle:@"返回" forState:UIControlStateNormal];
+        
+        [backButton addTarget:self action:@selector(backButtonDidClick:) forControlEvents:UIControlEventTouchUpInside];
+        
+        backButton.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.view addSubview:backButton];
+        
+        [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:backButton
+                                                                 attribute:NSLayoutAttributeTop
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:self.view
+                                                                 attribute:NSLayoutAttributeTop
+                                                                multiplier:1
+                                                                  constant:16],
+                                    
+                                    [NSLayoutConstraint constraintWithItem:backButton
+                                                                 attribute:NSLayoutAttributeLeft
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:self.view
+                                                                 attribute:NSLayoutAttributeLeft
+                                                                multiplier:1
+                                                                  constant:10],
+                                    
+                                    [NSLayoutConstraint constraintWithItem:backButton
+                                                                 attribute:NSLayoutAttributeWidth
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:nil
+                                                                 attribute:NSLayoutAttributeWidth
+                                                                multiplier:1
+                                                                  constant:60],
+                                    
+                                    [NSLayoutConstraint constraintWithItem:backButton
+                                                                 attribute:NSLayoutAttributeHeight
+                                                                 relatedBy:NSLayoutRelationEqual
+                                                                    toItem:nil
+                                                                 attribute:NSLayoutAttributeHeight
+                                                                multiplier:1
+                                                                  constant:44]
+                                    ]];
+
+        
+    }
 }
 
 -(void)setupScrollView
@@ -494,6 +549,11 @@
         self.screenshotView.layer.borderWidth = 0;
         [self.delegate screenshotViewController:self didImage:[self imageFromView:self.screenshotView]];
     }
+}
+
+- (void)backButtonDidClick:(UIButton *) btn
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 //获得某个范围内的屏幕图像

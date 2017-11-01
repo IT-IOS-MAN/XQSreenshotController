@@ -11,7 +11,7 @@
 
 #define WeakSelf __weak typeof(self) weakSelf = self;
 
-@interface ViewController ()<UIImagePickerControllerDelegate, UINavigationControllerDelegate, XQScreenshotViewControllerDelegate>
+@interface ViewController ()<UIImagePickerControllerDelegate, UINavigationControllerDelegate, XQScreenshotViewControllerDelegate, UIActionSheetDelegate>
 
 @property(nonatomic, weak) UINavigationController * nav;
 
@@ -33,40 +33,35 @@
 
 - (IBAction)selectImage:(id)sender {
     
-    WeakSelf
+    UIActionSheet * sheet = [[UIActionSheet alloc] initWithTitle:@"选择图片" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"相机", @"图库",  nil];
+    [sheet showInView:self.view];
+    
+    
+    
+}
+
+#pragma mark - UIActionSheetDelegate
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
     
     UIImagePickerController *imgPicker = [[UIImagePickerController alloc] init];
     
     imgPicker.delegate = self;
     
-    
-    // 添加图片
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择图片" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"相机" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        
+    if (buttonIndex == 0) {
         [imgPicker setSourceType:UIImagePickerControllerSourceTypeCamera];
         
-        [weakSelf presentViewController:imgPicker animated:YES completion:nil];
-        
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"图库" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        
+        [self presentViewController:imgPicker animated:YES completion:nil];
+    } else if (buttonIndex == 1) {
         [imgPicker setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
         
-        [weakSelf presentViewController:imgPicker animated:YES completion:nil];
-        
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    
-    [weakSelf presentViewController:alert animated:YES completion:nil];
-    
+        [self presentViewController:imgPicker animated:YES completion:nil];
+    }
     self.picker = imgPicker;
-    
 }
 
 #pragma mark - UIImagePickerControllerDelegate
-- (void)imagePickerController:(UIViewController *)picker didFinishPickingMediaWithInfo:(id)info
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(id)info
 {
     
     if ([picker isMemberOfClass:nil]) {
@@ -78,6 +73,7 @@
         XQScreenshotViewController *vc = [[XQScreenshotViewController alloc] init];
         vc.delegate = self;
         vc.image = headerImage;
+        
         [self.nav pushViewController:vc animated:YES];
     }
     
