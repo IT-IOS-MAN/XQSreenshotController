@@ -3,7 +3,7 @@
 
 #CocoPods
 ```
-pod 'XQSreenshotController', '~> 0.0.1'
+pod 'XQSreenshotController', '~> 0.0.2'
 ```
 
 ### 头像选择器
