@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 s.name = 'XQSreenshotController'
 s.version = '0.0.1'
-s.license = 'MIT'
+s.license = { :type => "MIT", :file => "LICENSE" }
 s.summary = '多级菜单'
 s.homepage = 'https://github.com/weakGG/XQSreenshotController'
 s.authors = { 'WeakGG' => '917709989@qq.com' }
