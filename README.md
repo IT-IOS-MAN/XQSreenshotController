@@ -3,7 +3,7 @@
 
 #CocoPods
 ```
-pod 'XQSreenshotController', '~> 0.0.2'
+pod 'XQSreenshotController', '~> 1.0.0'
 ```
 
 gif 图片加载中...
