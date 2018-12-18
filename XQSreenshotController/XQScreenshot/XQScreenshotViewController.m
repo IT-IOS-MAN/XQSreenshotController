@@ -16,16 +16,32 @@
 
 @property(nonatomic, weak) UIScrollView *scrollView;
 
+@property (nonatomic, strong) NSBundle *screenshotBundle;
+
 @end
 
 @implementation XQScreenshotViewController
+
+- (instancetype)init
+{
+    if (self = [super init]) {
+        _screenshotBundle = [NSBundle bundleForClass:[self class]];
+        NSString *bundlePath = [_screenshotBundle pathForResource:@"XQScreenshot" ofType:@"bundle"];
+        if (bundlePath) {
+            _screenshotBundle = [NSBundle bundleWithPath:bundlePath];
+        }
+    }
+    return self;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.view.backgroundColor = [UIColor blackColor];
-    self.title = @"移动和缩放";
-    
+    self.title = NSLocalizedStringFromTableInBundle(@"screenshot.title", @"XQScreenshot", _screenshotBundle, nil);
+    if([UIDevice currentDevice].systemVersion.floatValue >= 7.0){
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
 
     [self setupScrollView];
     [self setupIconView];
@@ -72,16 +88,43 @@
     
     // scrollView set
     self.scrollView.contentSize = iocnView.frame.size;
+    CGFloat InsetTop = self.view.frame.size.height;
+    if (!self.navigationController.navigationBar.translucent){
+        if([UIDevice currentDevice].systemVersion.floatValue >= 7.0){
+            if (!self.navigationController.navigationBar.hidden) {
+                InsetTop -= 64;
+            }
+        } else {
+            if (!self.navigationController.navigationBar.hidden) {
+                InsetTop -= 44;
+            }
+        }
+    }
     
-    CGFloat InsetTop = (self.view.frame.size.height - screenshotViewWH) * 0.5;
-    if (!self.navigationController.navigationBar.hidden &&  [UIDevice currentDevice].systemVersion.floatValue >= 7.0)
-    {
-        InsetTop -= self.navigationController.navigationBar.frame.size.height;
+    InsetTop = (InsetTop - screenshotViewWH) * 0.5;
+    
+    if (self.navigationController.navigationBar.translucent){
+        if (!self.navigationController.navigationBar.hidden &&  [UIDevice currentDevice].systemVersion.floatValue >= 7.0)
+        {
+            InsetTop -= self.navigationController.navigationBar.frame.size.height;
+        }
+        if (![UIApplication sharedApplication].statusBarHidden) {
+            InsetTop -=  [[UIApplication sharedApplication] statusBarFrame].size.height;
+        }
     }
-    if (![UIApplication sharedApplication].statusBarHidden) {
-        InsetTop -=  [[UIApplication sharedApplication] statusBarFrame].size.height;
+    CGFloat InsetBottom = self.view.frame.size.height;
+    if (!self.navigationController.navigationBar.translucent){
+        if([UIDevice currentDevice].systemVersion.floatValue >= 7.0){
+            if (!self.navigationController.navigationBar.hidden) {
+                InsetBottom -= 64;
+            }
+        } else {
+            if (!self.navigationController.navigationBar.hidden) {
+                InsetBottom -= 44;
+            }
+        }
     }
-    CGFloat InsetBottom = (self.view.frame.size.height - screenshotViewWH) * 0.5;
+    InsetBottom = (InsetBottom - screenshotViewWH) * 0.5;
     CGFloat InsetLeftRight = (self.view.frame.size.width - screenshotViewWH) * 0.5;
     self.scrollView.contentInset = UIEdgeInsetsMake(InsetTop, InsetLeftRight, InsetBottom, InsetLeftRight);
     
@@ -101,7 +144,7 @@
     if (self.navigationController.navigationBar.hidden) {
         UIButton *backButton = [[UIButton alloc] init];
         
-        [backButton setTitle:@"返回" forState:UIControlStateNormal];
+        [backButton setTitle:NSLocalizedStringFromTableInBundle(@"screenshot.back", @"XQScreenshot", _screenshotBundle, nil) forState:UIControlStateNormal];
         
         [backButton addTarget:self action:@selector(backButtonDidClick:) forControlEvents:UIControlEventTouchUpInside];
         
@@ -198,11 +241,12 @@
 {
     
     UIView *screenshotView = [[UIView alloc] init];
+    screenshotView.userInteractionEnabled = NO;
     screenshotView.layer.borderWidth = 1;
     screenshotView.layer.borderColor = [UIColor whiteColor].CGColor;
     screenshotView.layer.cornerRadius = 3;
     screenshotView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.scrollView addSubview:screenshotView];
+    [self.view addSubview:screenshotView];
     
     [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:screenshotView
                                                              attribute:NSLayoutAttributeWidth
@@ -246,9 +290,10 @@
     
     // top
     UIView *topView = [[UIView alloc] init];
+    topView.userInteractionEnabled = NO;
     topView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     topView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.scrollView addSubview:topView];
+    [self.view addSubview:topView];
     
     [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:topView
                                                              attribute:NSLayoutAttributeTop
@@ -285,9 +330,10 @@
     
     // left
     UIView *leftView = [[UIView alloc] init];
+    leftView.userInteractionEnabled = NO;
     leftView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     leftView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.scrollView addSubview:leftView];
+    [self.view addSubview:leftView];
     
     [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:leftView
                                                              attribute:NSLayoutAttributeTop
@@ -324,9 +370,10 @@
     
     // bottom
     UIView *bottomView = [[UIView alloc] init];
+    bottomView.userInteractionEnabled = NO;
     bottomView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     bottomView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.scrollView addSubview:bottomView];
+    [self.view addSubview:bottomView];
     
     [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:bottomView
                                                              attribute:NSLayoutAttributeTop
@@ -363,9 +410,10 @@
     
     // right
     UIView *rightView = [[UIView alloc] init];
+    rightView.userInteractionEnabled = NO;
     rightView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     rightView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.scrollView addSubview:rightView];
+    [self.view addSubview:rightView];
     
     [self.view addConstraints:@[[NSLayoutConstraint constraintWithItem:rightView
                                                              attribute:NSLayoutAttributeTop
@@ -489,7 +537,7 @@
     commitButton.clipsToBounds = YES;
     commitButton.backgroundColor = [UIColor whiteColor];
     [commitButton addTarget:self action:@selector(commitButtonDidClick) forControlEvents:UIControlEventTouchUpInside];
-    [commitButton setTitle:@"确定" forState:UIControlStateNormal];
+    [commitButton setTitle:NSLocalizedStringFromTableInBundle(@"screenshot.ok", @"XQScreenshot", _screenshotBundle, nil) forState:UIControlStateNormal];
     [commitButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     commitButton.titleLabel.font = [UIFont systemFontOfSize:14];
     commitButton.translatesAutoresizingMaskIntoConstraints = NO;
@@ -548,6 +596,10 @@
 #pragma mark - 点击事件
 -(void)commitButtonDidClick
 {
+    if([UIDevice currentDevice].systemVersion.floatValue <= 7.0){
+        [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:NO];
+    }
+    
     if([self.delegate respondsToSelector:@selector(screenshotViewController:didImage:)]){
         self.screenshotView.layer.borderWidth = 0;
         [self.delegate screenshotViewController:self didImage:[self imageFromView:self.screenshotView]];
@@ -556,6 +608,10 @@
 
 - (void)backButtonDidClick:(UIButton *) btn
 {
+    if([UIDevice currentDevice].systemVersion.floatValue <= 7.0){
+        [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:NO];
+    }
+    
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -571,8 +627,8 @@
     // 创建一个context
     CGImageRef sourceImageRef = [image CGImage];
     CGRect frame = theView.frame;
-    frame.origin.y -= self.scrollView.contentOffset.y;
-    frame.origin.x -= self.scrollView.contentOffset.x;
+//    frame.origin.y -= self.scrollView.contentOffset.y;
+//    frame.origin.x -= self.scrollView.contentOffset.x;
     CGImageRef newImageRef = CGImageCreateWithImageInRect(sourceImageRef, frame);
     UIImage *newImage = [UIImage imageWithCGImage:newImageRef];
     
