@@ -93,7 +93,7 @@
 }
 
 #pragma mark - XQScreenshotViewControllerDelegate
--(void)screenshotViewController:(XQScreenshotViewController *)screenshotViewController didImage:(UIImage *)image
+-(void)xq_screenshotViewController:(XQScreenshotViewController *)screenshotViewController didImage:(UIImage *)image
 {
     _headerView.image = image;
     

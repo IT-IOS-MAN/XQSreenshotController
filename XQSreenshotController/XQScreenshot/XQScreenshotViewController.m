@@ -600,9 +600,9 @@
         [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:NO];
     }
     
-    if([self.delegate respondsToSelector:@selector(screenshotViewController:didImage:)]){
+    if([self.delegate respondsToSelector:@selector(xq_screenshotViewController:didImage:)]){
         self.screenshotView.layer.borderWidth = 0;
-        [self.delegate screenshotViewController:self didImage:[self imageFromView:self.screenshotView]];
+        [self.delegate xq_screenshotViewController:self didImage:[self imageFromView:self.screenshotView]];
     }
 }
 

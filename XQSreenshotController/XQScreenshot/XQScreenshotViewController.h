@@ -13,7 +13,7 @@
 @protocol XQScreenshotViewControllerDelegate <NSObject>
 
 @optional
--(void)screenshotViewController:(XQScreenshotViewController *) screenshotViewController didImage:(UIImage *) image;
+-(void)xq_screenshotViewController:(XQScreenshotViewController *) screenshotViewController didImage:(UIImage *) image;
 
 @end
 
